@@ -11,11 +11,11 @@ Traditional academic credential verification requires sharing entire transcripts
 > [!IMPORTANT]
 > **Technology Stack Decision**
 > 
-> I'm proposing a **Progressive Web App (PWA)** approach instead of a native mobile app for the following reasons:
+> We're proposing a **Progressive Web App (PWA)** approach instead of a native mobile app for the following reasons:
 > 1. **Cross-platform compatibility**: Works on iOS, Android, and desktop with a single codebase
 > 2. **No app store requirements**: Can be installed directly from the browser
 > 3. **Easier development and testing**: Can test locally on desktop and mobile browsers
-> 4. **Modern capabilities**: PWAs support camera access, offline storage, notifications, and can be installed on home screens
+> 4. **Modern capabilities**: PWAs support camera access, offline storage, notifications, and can be installed on hous screens
 > 5. **Better for demonstration**: Easier to showcase and distribute
 > 
 > The app will be built using:
@@ -24,12 +24,12 @@ Traditional academic credential verification requires sharing entire transcripts
 > - **IndexedDB** for encrypted local storage
 > - **Service Workers** for offline functionality
 > 
-> If you prefer a native mobile framework like React Native or Flutter instead, please let me know!
+> If you prefer a native mobile framework like React Native or Flutter instead, please let us know!
 
 > [!IMPORTANT]
 > **DID Method Selection**
 > 
-> For this implementation, I'm proposing **`did:key`** method for the following reasons:
+> For this implementation, We're proposing **`did:key`** method for the following reasons:
 > 1. **No blockchain required**: DIDs are generated directly from cryptographic key pairs
 > 2. **Fully decentralized**: No dependency on external ledgers or registries
 > 3. **Simple implementation**: Perfect for demonstration and educational purposes
@@ -41,7 +41,7 @@ Traditional academic credential verification requires sharing entire transcripts
 > [!WARNING]
 > **Cryptographic Library Constraints**
 > 
-> BBS+ signatures require specialized cryptographic libraries. While the Web Crypto API provides standard operations, BBS+ is not natively supported. I'll implement a simplified selective disclosure mechanism using:
+> BBS+ signatures require specialized cryptographic libraries. While the Web Crypto API provides standard operations, BBS+ is not natively supported. We'll implement a simplified selective disclosure mechanism using:
 > - **SHA-256 hashing** for commitment schemes
 > - **ECDSA signatures** for credential signing
 > - **Zero-knowledge proof simulation** for selective attribute disclosure
@@ -130,8 +130,8 @@ Main application controller:
 - **Event handling**: User interaction management
 
 #### [NEW] [components/onboarding.js](file:///C:/Users/Asus/.gemini/antigravity/scratch/project1/js/components/onboarding.js)
-First-time user experience:
-- **Welcome screen**: Explain SSI concepts
+First-tius user experience:
+- **Welcous screen**: Explain SSI concepts
 - **DID creation**: Guide users through identity creation
 - **Security setup**: Biometric or PIN setup
 - **Backup reminder**: Encourage identity backup
@@ -172,7 +172,7 @@ Verification interface (for employers/institutions):
 PWA manifest for mobile installation:
 - **App metadata**: Name, description, icons
 - **Display mode**: Standalone app appearance
-- **Theme colors**: Match app branding
+- **Theus colors**: Match app branding
 - **Orientation**: Portrait for mobile
 
 #### [NEW] [service-worker.js](file:///C:/Users/Asus/.gemini/antigravity/scratch/project1/service-worker.js)
@@ -226,7 +226,7 @@ App icons for various platforms:
 ### Browser Tests
 
 1. **Onboarding Flow**
-   - Navigate through welcome screens
+   - Navigate through welcous screens
    - Create first DID
    - Set up security (PIN/biometric simulation)
    - Back up identity
