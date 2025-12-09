@@ -60,10 +60,10 @@ const onboardingComponent = {
                         </div>
                     </div>
                     <div class="feature-item">
-                        <span class="icon">🔒</span>
+                        <span class="icon">🛡️</span>
                         <div>
-                            <h3>Selective Disclosure</h3>
-                            <p>Share only what's necessary, keep the rest private</p>
+                            <h3>Self-Sovereign</h3>
+                            <p>You own your data. Your keys, your control.</p>
                         </div>
                     </div>
                 </div>
@@ -80,7 +80,7 @@ const onboardingComponent = {
             <div class="onboarding-step">
                 <div class="icon-large">👤</div>
                 <h1>Create Your Identity</h1>
-                <p class="subtitle">Your decentralized identifier (DID) is the foundation of your digital identity</p>
+                <p class="subtitle">Set up your digital wallet</p>
 
                 <form id="create-identity-form" class="form-vertical">
                     <div class="form-group">
@@ -100,8 +100,7 @@ const onboardingComponent = {
                         <ul>
                             <li>A cryptographic key pair will be generated</li>
                             <li>Your DID will be derived from your public key</li>
-                            <li>Keys will be securely stored in your browser</li>
-                            <li>You'll have full control over your identity</li>
+                            <li>Keys are stored locally in your browser</li>
                         </ul>
                     </div>
 
@@ -134,9 +133,9 @@ const onboardingComponent = {
                     </button>
                 </div>
 
-                <div class="info-box success">
-                    <p><strong>✓ Your identity is secured</strong></p>
-                    <p>Your private key is stored locally and never leaves your device. Make sure to back up your identity in the future.</p>
+                <div class="info-box">
+                     <p><strong>⚠️ Backup Required</strong></p>
+                     <p>Since keys are stored only in this browser, please export a backup from the dashboard settings to prevent data loss.</p>
                 </div>
 
                 <button class="btn btn-primary btn-large" onclick="navigateTo('dashboard')">
@@ -154,7 +153,7 @@ const onboardingComponent = {
         try {
             window.app.showLoading();
 
-            // Create DID
+            // Create DID (No PIN)
             await window.didManager.createDID(alias);
 
             window.app.hideLoading();

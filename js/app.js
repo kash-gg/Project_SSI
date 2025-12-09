@@ -30,12 +30,8 @@ class SSIApp {
             // Hide loading, show main content
             this.hideLoading();
 
-            // Route to appropriate view
-            if (!hasDID) {
-                this.showOnboarding();
-            } else {
-                this.showDashboard();
-            }
+            // Route to initial role selection
+            this.navigateTo('role-select');
 
             console.log('✓ SSI Wallet initialized successfully');
 
@@ -89,8 +85,17 @@ class SSIApp {
             case 'verifier':
                 this.showVerifier();
                 break;
+            case 'role-select':
+                this.showRoleSelector();
+                break;
+            case 'uni-login':
+                this.showUniversityLogin();
+                break;
+            case 'verifier-login':
+                this.showVerifierLogin();
+                break;
             default:
-                this.showDashboard();
+                this.showRoleSelector();
         }
     }
 
@@ -142,6 +147,36 @@ class SSIApp {
         const mainContent = document.getElementById('main-content');
         mainContent.innerHTML = window.credentialVerifierComponent.render();
         window.credentialVerifierComponent.init();
+    }
+
+    /**
+     * Show Role Selector
+     */
+    showRoleSelector() {
+        this.currentView = 'role-select';
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = window.roleSelectorComponent.render();
+        window.roleSelectorComponent.init();
+    }
+
+    /**
+     * Show University Login
+     */
+    showUniversityLogin() {
+        this.currentView = 'uni-login';
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = window.universityLoginComponent.render();
+        window.universityLoginComponent.init();
+    }
+
+    /**
+     * Show Verifier Login
+     */
+    showVerifierLogin() {
+        this.currentView = 'verifier-login';
+        const mainContent = document.getElementById('main-content');
+        mainContent.innerHTML = window.verifierLoginComponent.render();
+        window.verifierLoginComponent.init();
     }
 
     /**
