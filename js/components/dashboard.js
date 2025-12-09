@@ -8,10 +8,13 @@ const dashboardComponent = {
         return `
             <div class="dashboard-container">
                 <header class="dashboard-header">
-                    <h1>SSI Wallet</h1>
-                    <div class="header-actions">
+                    <h1>Student Wallet</h1>
+                    <div class="header-actions" style="display: flex; gap: 10px;">
                         <button class="btn-icon" onclick="window.app.refresh()" title="Refresh">
                             🔄
+                        </button>
+                        <button class="btn-icon" onclick="dashboardComponent.toggleSettings()" title="Settings">
+                            ⚙️
                         </button>
                     </div>
                 </header>
@@ -22,25 +25,15 @@ const dashboardComponent = {
                         <!-- Populated by init() -->
                     </div>
 
-                    <!-- Role Selector -->
-                    <div class="role-selector">
-                        <h2>What would you like to do?</h2>
-                        <div class="role-cards">
-                            <div class="role-card" onclick="navigateTo('issuer')">
-                                <div class="role-icon">🎓</div>
-                                <h3>Issue Credentials</h3>
-                                <p>Act as a university to issue academic credentials</p>
-                            </div>
-                            <div class="role-card" onclick="navigateTo('holder')">
-                                <div class="role-icon">👤</div>
+                    <!-- Main Action -->
+                    <div class="action-section mb-6">
+                        <div class="role-card" onclick="navigateTo('holder')" style="width: 100%; max-width: 100%; flex-direction: row; justify-content: start; padding: 20px;">
+                            <div class="role-icon" style="margin-bottom: 0; margin-right: 20px;">👤</div>
+                            <div class="text-left">
                                 <h3>My Credentials</h3>
-                                <p>View and share your credentials selectively</p>
+                                <p style="margin: 0;">View and manage your verified credentials</p>
                             </div>
-                            <div class="role-card" onclick="navigateTo('verifier')">
-                                <div class="role-icon">✓</div>
-                                <h3>Verify Credentials</h3>
-                                <p>Check the validity of shared credentials</p>
-                            </div>
+                            <div style="margin-left: auto;">→</div>
                         </div>
                     </div>
 
@@ -52,6 +45,31 @@ const dashboardComponent = {
                         </div>
                     </div>
                 </div>
+
+                <!-- Settings Modal -->
+                <div id="settings-modal" class="modal hidden">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2>Wallet Settings</h2>
+                            <button class="btn-close" onclick="dashboardComponent.toggleSettings()">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                             <div class="credential-detail-section">
+                                <h3>Backup & Restore</h3>
+                                <p class="text-muted mb-4">Export your wallet to safe keep your identity. Import to restore on another device.</p>
+                                
+                                <button class="btn btn-secondary btn-block mb-4" onclick="dashboardComponent.exportWallet()">
+                                    📤 Export Wallet
+                                </button>
+                                
+                                <div class="form-group">
+                                    <label>Import Wallet</label>
+                                    <input type="file" id="import-file" accept=".json" onchange="dashboardComponent.importWallet(this)" />
+                                </div>
+                             </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
     },
@@ -59,6 +77,11 @@ const dashboardComponent = {
     async init() {
         await this.renderIdentityCard();
         await this.renderRecentActivity();
+    },
+
+    toggleSettings() {
+        const modal = document.getElementById('settings-modal');
+        if (modal) modal.classList.toggle('hidden');
     },
 
     async renderIdentityCard() {
@@ -84,6 +107,9 @@ const dashboardComponent = {
                             📋
                         </button>
                     </div>
+                    <span class="badge badge-success">
+                        Active
+                    </span>
                 </div>
             </div>
             <div class="identity-stats">
@@ -115,16 +141,20 @@ const dashboardComponent = {
             return;
         }
 
-        const activities = credentials
+        // Sort by date desc
+        const sorted = [...credentials].sort((a, b) => new Date(b.issuanceDate) - new Date(a.issuanceDate));
+
+        const activities = sorted
             .slice(0, 5)
             .map(cred => {
                 const isIssued = cred.issuer === window.didManager.activeDID?.id;
                 return `
-                    <div class="activity-item">
-                        <span class="activity-icon">${isIssued ? '📤' : '📥'}</span>
+                    <div class="activity-item" style="display:flex; gap:10px; padding:10px; border-bottom:1px solid var(--glass-border);">
+                        <span class="activity-icon" style="font-size:1.5em;">${isIssued ? '📤' : '📥'}</span>
                         <div class="activity-details">
-                            <p class="activity-title">${isIssued ? 'Issued' : 'Received'} credential</p>
-                            <p class="activity-meta">${new Date(cred.issuanceDate).toLocaleString()}</p>
+                            <p class="activity-title" style="margin:0; font-weight:600;">${isIssued ? 'Issued' : 'Received'} credential</p>
+                            <small class="text-muted">${cred.credentialSubject.degree || 'Credential'}</small>
+                            <p class="activity-meta" style="margin:0; font-size:0.8em; color:var(--text-tertiary);">${new Date(cred.issuanceDate).toLocaleString()}</p>
                         </div>
                     </div>
                 `;
@@ -137,6 +167,40 @@ const dashboardComponent = {
     shortenDID(did) {
         if (!did || did.length < 20) return did;
         return `${did.substring(0, 15)}...${did.substring(did.length - 10)}`;
+    },
+
+    async exportWallet() {
+        try {
+            const data = await window.didManager.exportWallet();
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ssi-wallet-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            window.app.showSuccess('Wallet backup downloaded');
+        } catch (e) {
+            window.app.showError('Export failed: ' + e.message);
+        }
+    },
+
+    async importWallet(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const json = e.target.result;
+                await window.didManager.importWallet(json);
+                window.app.showSuccess('Wallet imported successfully!');
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (err) {
+                window.app.showError('Import failed: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
     }
 };
 

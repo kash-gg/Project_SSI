@@ -103,6 +103,7 @@ const credentialHolderComponent = {
 
         const subject = this.selectedCredential.credentialSubject;
         const courses = subject.courses || [];
+        const isOwner = window.didManager.activeDID?.id === subject.id;
 
         const coursesHTML = courses.map(course => `
             <tr>
@@ -115,7 +116,15 @@ const credentialHolderComponent = {
 
         details.innerHTML = `
             <div class="credential-detail-section">
-                <h3>Student Information</h3>
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <h3>Student Information</h3>
+                    ${isOwner ? `
+                    <div class="dropdown">
+                         <button class="btn btn-small btn-secondary btn-icon-danger" onclick="if(confirm('Are you sure you want to delete this credential?')) { credentialHolderComponent.deleteCredential('${credentialId}'); }">
+                            🗑️ Delete
+                         </button>
+                    </div>` : ''}
+                </div>
                 <div class="detail-grid">
                     <div class="detail-item">
                         <label>Name</label>
@@ -148,19 +157,21 @@ const credentialHolderComponent = {
 
             <div class="credential-detail-section">
                 <h3>Courses</h3>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Course</th>
-                            <th>Grade</th>
-                            <th>Credits</th>
-                            <th>Year</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${coursesHTML}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Grade</th>
+                                <th>Credits</th>
+                                <th>Year</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${coursesHTML}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="credential-detail-section">
@@ -204,6 +215,17 @@ const credentialHolderComponent = {
         modal.classList.remove('hidden');
     },
 
+    async deleteCredential(id) {
+        try {
+            await window.credentialManager.deleteCredential(id);
+            this.closeModal();
+            this.renderCredentials();
+            window.app.showSuccess('Credential deleted');
+        } catch (e) {
+            window.app.showError('Failed to delete: ' + e.message);
+        }
+    },
+
     async shareSelectively() {
         if (!this.selectedCredential) return;
 
@@ -243,29 +265,30 @@ const credentialHolderComponent = {
         const details = document.getElementById('credential-details');
         if (!details) return;
 
+        // Store data for copying
+        this.currentPresentationData = data;
+
         details.innerHTML = `
             <div class="success-message">
                 <div class="icon-large success">✓</div>
-                <h2>Shareable Presentation Created!</h2>
-                <p>The following attributes will be revealed:</p>
-                <ul>
-                    ${revealed.map(attr => `<li>${attr}</li>`).join('')}
-                </ul>
+                <h2>Presentation Ready</h2>
+                <p>The following attributes will be revealed: <strong>${revealed.join(', ')}</strong></p>
             </div>
 
-            <div class="presentation-data">
-                <h3>Presentation Data</h3>
-                <textarea readonly class="presentation-textarea">${data}</textarea>
-                <button class="btn btn-secondary btn-block" onclick="navigator.clipboard.writeText(\`${data.replace(/`/g, '\\`')}\`); window.app.showSuccess('Copied to clipboard!')">
-                    📋 Copy to Clipboard
-                </button>
-            </div>
-
-            <div class="info-box">
-                <p><strong>How to share:</strong></p>
-                <p>1. Copy the presentation data above</p>
-                <p>2. Share it with the verifier (employer, institution, etc.)</p>
-                <p>3. They can verify it without seeing hidden attributes</p>
+            <div class="presentation-data text-center">
+                <h3>Share with Verifier</h3>
+                
+                <textarea readonly class="presentation-textarea" style="height: 150px;">${data}</textarea>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="window.credentialHolderComponent.copyPresentationData()">
+                        📋 Copy Data
+                    </button>
+                    <!-- Link sharing simulation -->
+                    <button class="btn btn-primary" onclick="window.credentialHolderComponent.copyPresentationLink()">
+                        🔗 Copy Link
+                    </button>
+                </div>
             </div>
 
             <div class="modal-actions">
@@ -276,12 +299,35 @@ const credentialHolderComponent = {
         `;
     },
 
+    async copyPresentationData() {
+        if (!this.currentPresentationData) return;
+        try {
+            await navigator.clipboard.writeText(this.currentPresentationData);
+            window.app.showSuccess('Presentation data copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy:', err);
+            window.app.showError('Failed to copy to clipboard');
+        }
+    },
+
+    copyPresentationLink() {
+        if (!this.currentPresentationData) return;
+        // Simulate a link
+        const link = `https://ssi-wallet.app/verify?data=${encodeURIComponent(this.currentPresentationData.substring(0, 50))}...`;
+        navigator.clipboard.writeText(link).then(() => {
+            window.app.showSuccess('Shareable link copied!');
+        }).catch(() => {
+            window.app.showError('Failed to copy link');
+        });
+    },
+
     closeModal() {
         const modal = document.getElementById('credential-modal');
         if (modal) {
             modal.classList.add('hidden');
         }
         this.selectedCredential = null;
+        this.currentPresentationData = null;
     }
 };
 
