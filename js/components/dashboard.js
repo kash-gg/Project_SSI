@@ -13,7 +13,7 @@ const dashboardComponent = {
                         <h1>Student Wallet</h1>
                     </div>
                     <div class="header-actions" style="display: flex; gap: 10px;">
-                        <button class="btn-icon" onclick="window.app.refresh()" title="Refresh">
+                        <button class="btn-icon" onclick="dashboardComponent.refresh()" title="Refresh">
                             🔄
                         </button>
                         <button class="btn-icon" onclick="dashboardComponent.toggleSettings()" title="Settings">
@@ -96,6 +96,13 @@ const dashboardComponent = {
     toggleSettings() {
         const modal = document.getElementById('settings-modal');
         if (modal) modal.classList.toggle('hidden');
+    },
+
+    async refresh() {
+        // Re-initialize the dashboard to reload all data
+        await this.renderIdentityCard();
+        await this.renderRecentActivity();
+        window.app.showSuccess('Dashboard refreshed');
     },
 
     async renderIdentityCard() {
