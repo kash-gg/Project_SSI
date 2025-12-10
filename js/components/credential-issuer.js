@@ -355,9 +355,9 @@ const credentialIssuerComponent = {
             window.app.hideLoading();
             window.app.showSuccess('Credential issued successfully!');
 
-            // Switch to history tab
-            this.switchTab('history');
+            // Load history first, then switch tab to render with updated data
             await this.loadHistory();
+            this.switchTab('history');
 
             // Clear pending data and form defaults
             this.pendingIssuanceData = null;
